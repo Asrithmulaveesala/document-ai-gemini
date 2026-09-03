@@ -1,0 +1,6 @@
+venv/
+.env
+__pycache__/
+.ipynb_checkpoints/
+faiss_index/
+Koushik_Asrith_resume.pdf
