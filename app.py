@@ -62,16 +62,7 @@ st.markdown(
     """
     <style>
 
-    /* ========================================================
-       REMOVE CHAT AVATARS
-       ======================================================== */
-
-    [data-testid="stChatMessageAvatarUser"],
-    [data-testid="stChatMessageAvatarAssistant"] {
-
-        display: none;
-
-    }
+    
 
 
     /* ========================================================
