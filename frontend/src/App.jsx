@@ -17,7 +17,7 @@ import {
 
 import "./App.css";
 
-const API_URL = "https://document-ai-gemini.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
   // ============================================================
