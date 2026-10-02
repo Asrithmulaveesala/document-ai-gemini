@@ -1,5 +1,6 @@
 import os
 import tempfile
+import uuid
 from pathlib import Path
 
 import streamlit as st
@@ -62,98 +63,45 @@ st.markdown(
     """
     <style>
 
-    
-
-
-    /* ========================================================
-       MAIN TITLE
-       ======================================================== */
-
     .main-title {
-
         text-align: center;
-
         font-size: 46px;
-
         font-weight: 700;
-
         margin-top: 25px;
-
         margin-bottom: 5px;
-
     }
-
-
-    /* ========================================================
-       SUBTITLE
-       ======================================================== */
 
     .subtitle {
-
         text-align: center;
-
         font-size: 16px;
-
         color: #9ca3af;
-
         margin-bottom: 30px;
-
     }
-
-
-    /* ========================================================
-       STATUS CARD
-       ======================================================== */
 
     .status-card {
-
         padding: 15px;
-
         border-radius: 10px;
-
         margin-top: 15px;
-
         margin-bottom: 15px;
-
         border: 1px solid rgba(128,128,128,0.2);
-
     }
-
-
-    /* ========================================================
-       FOOTER
-       ======================================================== */
 
     .footer {
-    position: fixed;
-    bottom: 8px;
-    width: 100%;
-    text-align: center;
-    font-size: 11px;
-    color: #999;
-    font-weight: normal;
-}
-
-
-    /* ========================================================
-       CHAT INPUT
-       ======================================================== */
-
-    [data-testid="stChatInput"] {
-
-        bottom: 35px;
-
+        position: fixed;
+        bottom: 8px;
+        width: 100%;
+        text-align: center;
+        font-size: 11px;
+        color: #999;
+        font-weight: normal;
     }
 
-
-    /* ========================================================
-       BOTTOM SPACE
-       ======================================================== */
+    [data-testid="stChatInput"] {
+        bottom: 35px;
+    }
 
     [data-testid="stAppViewContainer"] {
-
         padding-bottom: 90px;
-
     }
 
     </style>
@@ -167,28 +115,62 @@ st.markdown(
 # ============================================================
 
 if "messages" not in st.session_state:
-
     st.session_state.messages = []
 
 
 if "rag_chain" not in st.session_state:
-
     st.session_state.rag_chain = None
 
 
 if "documents_processed" not in st.session_state:
-
     st.session_state.documents_processed = False
 
 
 if "document_names" not in st.session_state:
-
     st.session_state.document_names = []
 
 
 if "chunk_count" not in st.session_state:
-
     st.session_state.chunk_count = 0
+
+
+# ============================================================
+# CHAT SESSIONS
+# ============================================================
+
+if "sessions" not in st.session_state:
+
+    st.session_state.sessions = {
+        "chat_1": {
+            "name": "New Chat",
+            "messages": []
+        }
+    }
+
+
+if "current_session_id" not in st.session_state:
+
+    st.session_state.current_session_id = "chat_1"
+
+
+# ============================================================
+# GET CURRENT SESSION
+# ============================================================
+
+current_session_id = st.session_state.current_session_id
+
+if current_session_id not in st.session_state.sessions:
+
+    st.session_state.sessions[current_session_id] = {
+        "name": "New Chat",
+        "messages": []
+    }
+
+
+# Make messages point to current session
+st.session_state.messages = (
+    st.session_state.sessions[current_session_id]["messages"]
+)
 
 
 # ============================================================
@@ -214,6 +196,73 @@ st.markdown(
 
 with st.sidebar:
 
+    st.markdown("## 💬 Chat Sessions")
+
+
+    # --------------------------------------------------------
+    # NEW CHAT
+    # --------------------------------------------------------
+
+    if st.button(
+        "➕ New Chat",
+        use_container_width=True
+    ):
+
+        new_session_id = f"chat_{uuid.uuid4().hex[:8]}"
+
+        st.session_state.sessions[new_session_id] = {
+            "name": "New Chat",
+            "messages": []
+        }
+
+        st.session_state.current_session_id = new_session_id
+
+        st.rerun()
+
+
+    # --------------------------------------------------------
+    # SESSION SELECTOR
+    # --------------------------------------------------------
+
+    session_ids = list(
+        st.session_state.sessions.keys()
+    )
+
+    session_names = [
+        st.session_state.sessions[session_id]["name"]
+        for session_id in session_ids
+    ]
+
+    selected_index = session_ids.index(
+        st.session_state.current_session_id
+    )
+
+
+    selected_session_name = st.selectbox(
+        "Select conversation",
+        session_names,
+        index=selected_index
+    )
+
+
+    selected_session_id = session_ids[
+        session_names.index(selected_session_name)
+    ]
+
+
+    if selected_session_id != st.session_state.current_session_id:
+
+        st.session_state.current_session_id = selected_session_id
+
+        st.rerun()
+
+
+    # ========================================================
+    # DOCUMENTS
+    # ========================================================
+
+    st.divider()
+
     st.markdown("## 📄 Documents")
 
     st.write(
@@ -222,9 +271,9 @@ with st.sidebar:
     )
 
 
-    # ========================================================
+    # --------------------------------------------------------
     # FILE UPLOADER
-    # ========================================================
+    # --------------------------------------------------------
 
     uploaded_files = st.file_uploader(
         "Upload PDF files",
@@ -233,9 +282,9 @@ with st.sidebar:
     )
 
 
-    # ========================================================
+    # --------------------------------------------------------
     # PROCESS BUTTON
-    # ========================================================
+    # --------------------------------------------------------
 
     process_button = st.button(
         "🚀 Process Documents",
@@ -260,13 +309,12 @@ with st.sidebar:
             all_documents = []
 
             progress_bar = st.progress(0)
-
             status_text = st.empty()
 
 
-            # =================================================
+            # ------------------------------------------------
             # LOAD PDFs
-            # =================================================
+            # ------------------------------------------------
 
             total_files = len(uploaded_files)
 
@@ -313,7 +361,6 @@ with st.sidebar:
 
                 finally:
 
-                    # Remove temporary file
                     if os.path.exists(temp_path):
 
                         os.remove(temp_path)
@@ -412,13 +459,12 @@ with st.sidebar:
                 )
 
 
-# ============================================================
-# SIDEBAR STATUS
-# ============================================================
-
-with st.sidebar:
+    # ========================================================
+    # SIDEBAR STATUS
+    # ========================================================
 
     st.divider()
+
 
     if st.session_state.documents_processed:
 
@@ -441,11 +487,13 @@ with st.sidebar:
 
         st.markdown("### Uploaded Files")
 
+
         for file_name in st.session_state.document_names:
 
             st.caption(
                 f"📄 {file_name}"
             )
+
 
     else:
 
@@ -456,17 +504,33 @@ with st.sidebar:
 
 
     # ========================================================
-    # CLEAR CHAT
+    # DELETE CURRENT CHAT
     # ========================================================
 
     st.divider()
 
+
     if st.button(
-        "🗑️ Clear Conversation",
+        "🗑️ Delete Current Chat",
         use_container_width=True
     ):
 
-        st.session_state.messages = []
+        if len(st.session_state.sessions) > 1:
+
+            del st.session_state.sessions[
+                st.session_state.current_session_id
+            ]
+
+            st.session_state.current_session_id = (
+                list(st.session_state.sessions.keys())[0]
+            )
+
+        else:
+
+            st.session_state.sessions[
+                st.session_state.current_session_id
+            ]["messages"] = []
+
 
         st.rerun()
 
@@ -558,6 +622,26 @@ if input_text:
 
 
     # ========================================================
+    # GIVE FIRST QUESTION AS CHAT NAME
+    # ========================================================
+
+    if (
+        st.session_state.sessions[
+            st.session_state.current_session_id
+        ]["name"] == "New Chat"
+    ):
+
+        short_name = input_text[:30]
+
+        if len(input_text) > 30:
+            short_name += "..."
+
+        st.session_state.sessions[
+            st.session_state.current_session_id
+        ]["name"] = short_name
+
+
+    # ========================================================
     # GENERATE RESPONSE
     # ========================================================
 
@@ -572,8 +656,19 @@ if input_text:
                 response = (
                     st.session_state
                     .rag_chain
-                    .invoke(input_text)
+                    .invoke(
+                        {
+                            "input": input_text
+                        },
+                        config={
+                            "configurable": {
+                                "session_id":
+                                st.session_state.current_session_id
+                            }
+                        }
+                    )
                 )
+
 
                 st.markdown(
                     response
@@ -608,7 +703,6 @@ if input_text:
 # FOOTER
 # ============================================================
 
-# Footer
 st.markdown(
     """
     <div class="footer">
@@ -617,3 +711,4 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
