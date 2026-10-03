@@ -1,240 +1,218 @@
-# 📄 Document AI
+# 📄 Document AI — RAG-Based Document Question Answering System
 
-An AI-powered document question-answering application that allows users to upload PDF documents and interact with them through a conversational chat interface.
+A modern **React.js frontend** for an AI-powered document question-answering application built using **Retrieval-Augmented Generation (RAG)**.
 
-The application uses **Retrieval-Augmented Generation (RAG)** to retrieve relevant information from uploaded documents and generate accurate answers using **Google Gemini**.
+Users can upload PDF documents and interact with them through a conversational chat interface. The frontend communicates with a **FastAPI backend**, which handles document processing, retrieval, Gemini embeddings, FAISS vector search, and LLM-based response generation.
 
-## 🚀 Features
+## 🚀 Live Demo
 
-* 📤 Upload one or multiple PDF documents
-* 📑 Extract text from uploaded documents
-* ✂️ Split documents into smaller chunks
-* 🧠 Generate embeddings using Gemini
-* 🔎 Semantic document retrieval using FAISS
-* 🤖 Generate answers using Google Gemini
-* 💬 Interactive conversational chat interface
-* 🗂️ Display uploaded documents and processed chunk information
-* ⚡ Built with LangChain and LCEL
-* 🎨 Clean and responsive Streamlit UI
+🌐 **Frontend:**
+https://document-ai-gemini.vercel.app/
+
+⚙️ **Backend API:**
+https://document-ai-gemini.onrender.com/
+
+> ⚠️ **Demo Note:** The application depends on the available Google Gemini API quota. If the API quota is temporarily exhausted, new requests may not be processed until the quota becomes available again.
+
+## ✨ Features
+
+* 📄 Upload PDF documents
+* 🔍 Document-based question answering
+* 🧠 Retrieval-Augmented Generation (RAG)
+* 🔢 Gemini-powered embeddings
+* 🗃️ FAISS vector search
+* 💬 Conversational chat interface
+* ⚡ Streaming AI responses
+* 📊 Document processing information
+* 🎨 Responsive and interactive React UI
+* 🔗 FastAPI backend integration
+* ☁️ Deployed application
+
+## 🏗️ Architecture
+
+```text
+                ┌──────────────────────┐
+                │      React.js        │
+                │      Frontend        │
+                └──────────┬───────────┘
+                           │
+                    HTTP / Streaming
+                           │
+                           ▼
+                ┌──────────────────────┐
+                │       FastAPI        │
+                │       Backend        │
+                └──────────┬───────────┘
+                           │
+                           ▼
+                ┌──────────────────────┐
+                │     RAG Pipeline     │
+                │      LangChain       │
+                └──────────┬───────────┘
+                           │
+             ┌─────────────┴─────────────┐
+             ▼                           ▼
+      Gemini Embeddings              FAISS
+             │                           │
+             └─────────────┬─────────────┘
+                           ▼
+                    Relevant Chunks
+                           │
+                           ▼
+                    Google Gemini
+                           │
+                           ▼
+                    Generated Answer
+                           │
+                           ▼
+                     React UI
+```
 
 ## 🛠️ Tech Stack
 
-* **Python**
-* **Streamlit**
-* **LangChain**
-* **LangChain Expression Language (LCEL)**
-* **Google Gemini**
-* **Gemini Embeddings**
-* **FAISS**
-* **PyPDF**
-* **python-dotenv**
+### Frontend
 
-## 🧠 Architecture
+* React.js
+* Vite
+* JavaScript
+* CSS
+* Lucide React
 
-```text
-                ┌─────────────────┐
-                │   PDF Upload    │
-                └────────┬────────┘
-                         │
-                         ▼
-                ┌─────────────────┐
-                │  PDF Extraction │
-                │   PyPDFLoader   │
-                └────────┬────────┘
-                         │
-                         ▼
-                ┌─────────────────┐
-                │  Text Splitting │
-                │ Recursive Split │
-                └────────┬────────┘
-                         │
-                         ▼
-                ┌─────────────────┐
-                │ Gemini Embedding│
-                └────────┬────────┘
-                         │
-                         ▼
-                ┌─────────────────┐
-                │      FAISS      │
-                │  Vector Store   │
-                └────────┬────────┘
-                         │
-                         ▼
-                ┌─────────────────┐
-                │    Retriever    │
-                └────────┬────────┘
-                         │
-                    Relevant
-                     Context
-                         │
-                         ▼
-                ┌─────────────────┐
-                │   Gemini LLM    │
-                └────────┬────────┘
-                         │
-                         ▼
-                ┌─────────────────┐
-                │   AI Response   │
-                └─────────────────┘
-```
+### Backend
 
-## 🔄 How It Works
+* Python
+* FastAPI
+* LangChain
+* LCEL
+* Google Gemini API
+* Gemini Embeddings
+* FAISS
+* PyPDF
 
-### 1. Upload Documents
+### Deployment
 
-Users can upload one or multiple PDF files directly through the Streamlit interface.
+* Vercel — Frontend
+* Render — Backend
+* GitHub — Version Control
 
-### 2. Document Loading
+## 🔄 RAG Workflow
 
-The uploaded PDFs are processed using `PyPDFLoader` to extract their text content.
+1. User uploads a PDF document.
+2. The backend extracts the document content.
+3. The content is split into smaller chunks.
+4. Gemini Embeddings are generated for the chunks.
+5. Embeddings are stored in FAISS.
+6. User submits a question.
+7. The question is converted into an embedding.
+8. FAISS retrieves the most relevant document chunks.
+9. Retrieved context is passed to Google Gemini.
+10. Gemini generates a context-based answer.
+11. The response is streamed back to the React frontend.
 
-### 3. Text Chunking
+## 📊 RAG Evaluation
 
-The extracted content is divided into smaller chunks using `RecursiveCharacterTextSplitter`.
+The project was also extended beyond basic RAG implementation to explore **RAG evaluation techniques**.
 
-```python
-RecursiveCharacterTextSplitter(
-    chunk_size=1000,
-    chunk_overlap=200
-)
-```
+The evaluation focuses on aspects such as:
 
-### 4. Embeddings
+* Retrieval relevance
+* Retrieved context quality
+* Answer quality
+* Context-based response generation
 
-Each document chunk is converted into a vector representation using Gemini Embeddings.
+This helped in understanding that building an effective RAG system involves not only retrieval and generation, but also measuring the quality of the overall pipeline.
 
-### 5. Vector Storage
-
-The generated embeddings are stored in a **FAISS vector database**, allowing efficient similarity search.
-
-### 6. Retrieval
-
-When the user asks a question, the retriever searches the vector database and finds the most relevant document chunks.
-
-### 7. Generation
-
-The retrieved context is passed to Google Gemini through a LangChain LCEL pipeline.
-
-The model generates an answer based on the retrieved document content.
-
-## 📂 Project Structure
+## 📁 Project Structure
 
 ```text
-Document-AI/
+document-ai/
 │
-├── app.py
-├── rag.py
-├── requirements.txt
-├── gemini-ai.ipynb
-├── .env.example
-├── .gitignore
+├── public/
+│
+├── src/
+│   ├── assets/
+│   ├── App.jsx
+│   ├── App.css
+│   ├── main.jsx
+│   └── ...
+│
+├── index.html
+├── package.json
+├── vite.config.js
 └── README.md
 ```
 
-## ⚙️ Installation
+## ⚙️ Local Setup
 
-Clone the repository:
-
-```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
-```
-
-Navigate to the project directory:
+### 1. Clone the repository
 
 ```bash
-cd Document-AI
+git clone <your-github-repository-url>
+cd <your-project-folder>
 ```
 
-Create a virtual environment:
+### 2. Install dependencies
 
 ```bash
-python -m venv venv
+npm install
 ```
 
-Activate the virtual environment on Windows:
+### 3. Configure the backend URL
 
-```bash
-venv\Scripts\activate
-```
-
-Install the required dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-## 🔑 Environment Variables
-
-Create a `.env` file in the project directory:
+Create a `.env` file in the frontend project:
 
 ```env
-GOOGLE_API_KEY=your_google_gemini_api_key
+VITE_API_URL=http://127.0.0.1:8000
 ```
 
-The `.env` file should **never be committed to GitHub**.
+For the deployed application, configure the environment variable with the deployed FastAPI backend URL.
 
-Use `.env.example` as a template.
-
-## ▶️ Run the Application
-
-Start the Streamlit application:
+### 4. Start the development server
 
 ```bash
-streamlit run app.py
+npm run dev
 ```
 
-The application will open in your browser.
-
-Upload your documents, process them, and start asking questions.
-
-## 💡 Example Questions
-
-After uploading a document, you can ask questions such as:
+The application will be available at:
 
 ```text
-What is this document about?
-
-What are the main skills mentioned?
-
-What is the candidate's educational qualification?
-
-Summarize the document.
-
-What certifications are mentioned?
-
-What projects are included in the document?
+http://localhost:5173
 ```
 
-## 🔐 RAG-Based Responses
+## 🎯 Project Focus
 
-The application is designed to answer questions using the information retrieved from the uploaded documents.
+The main focus of this project was to gain practical experience in building an end-to-end **RAG application**, including:
 
-If the required information cannot be found, the system is instructed to respond:
-
-```text
-I don't know based on the uploaded documents.
-```
-
-This helps reduce unsupported answers and keeps the chatbot focused on the provided documents.
-
-## 📈 Future Improvements
-
-* Support for DOCX, TXT, and other document formats
-* Persistent vector database storage
-* Document source citations
+* Document processing
+* Embeddings
+* Vector databases
+* Semantic retrieval
+* LLM integration
+* RAG evaluation
+* API development
 * Streaming responses
-* Multi-document conversations
-* Conversation memory
-* Improved document parsing
-* OCR support for scanned PDFs
-* Authentication and user-specific document storage
+* Frontend integration
+* Application deployment
+
+Authentication and database-backed chat persistence were intentionally kept outside the scope of this version so the project could remain focused on the **core RAG pipeline, evaluation, user experience, and deployment**.
+
+## 🔮 Future Work
+
+The next focus is to explore **AI Agents and Agentic AI**, including:
+
+* Tool calling
+* Agent workflows
+* Multi-step reasoning
+* Agent memory
+* Autonomous task execution
+* Building practical AI agent applications
 
 ## 👨‍💻 Author
 
 **Koushik Asrith Mulavisala**
 
-B.Tech — Computer Science & Engineering
+Interested in **Generative AI, RAG, LLM Applications, and Agentic AI**.
 
 ---
 
-⭐ If you find this project useful, consider giving the repository a star.
+⭐ If you find this project useful, feel free to explore the repository and try the live application.
