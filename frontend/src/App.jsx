@@ -920,7 +920,7 @@ function App() {
             <Sparkles size={17} />
 
             <span>
-              Document AI
+              Document RAG
             </span>
 
           </div>
